@@ -2,16 +2,20 @@ name: autobuild
 
 on:
   schedule:
-    - cron: '0 1 * * *' # runs every midnight
-    
-permissions:
-  contents: write
-  actions: read
-
+    - cron: '0 */1 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+
+    permissions:
+      contents: write
+      actions: read
 
     steps:
       - name: Checkout this repository
