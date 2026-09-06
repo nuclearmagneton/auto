@@ -36,19 +36,10 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Install Deno
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y unzip wget
-          wget https://github.com/denoland/deno/releases/download/v1.23.3/deno-x86_64-unknown-linux-gnu.zip
-          unzip deno-x86_64-unknown-linux-gnu.zip
-          sudo mv deno /usr/local/bin
-          deno --version
-
       - name: Re-generate m3u playlist
         run: |
           cd sources/news/
-          deno run --allow-all generate.ts
+          bash script.sh
           cd ../../
 
       - name: Get current India date and time
