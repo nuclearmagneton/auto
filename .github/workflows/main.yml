@@ -31,6 +31,7 @@ jobs:
           token: ${{ secrets.PRIVATE_SOURCE_TOKEN }}
           fetch-depth: 1
           persist-credentials: false
+          ref: master
 
       - name: Re-generate m3u playlist
         run: |
