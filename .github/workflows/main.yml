@@ -1,0 +1,66 @@
+name: Playlists ReGenerate (autobuild + private source)
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"    # every 15 minutes (adjust as needed)
+  workflow_dispatch:
+  repository_dispatch:
+    types: [source-updated, rebuild]
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          # persist-credentials left as default so GITHUB_TOKEN can push commits to this repo
+
+      - name: Checkout private source repository
+        uses: actions/checkout@v7
+        with:
+          repository: nuclearmagneton/news
+          path: sources/news
+          token: ${{ secrets.PRIVATE_SOURCE_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Deno
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y unzip wget
+          wget https://github.com/denoland/deno/releases/download/v1.23.3/deno-x86_64-unknown-linux-gnu.zip
+          unzip deno-x86_64-unknown-linux-gnu.zip
+          sudo mv deno /usr/local/bin
+          deno --version
+
+      - name: Re-generate m3u playlist
+        run: |
+          cd sources/news/
+          deno run --allow-all generate.ts
+          cd ../../
+
+      - name: Get current India date and time
+        id: date
+        run: echo "date=$(TZ=Asia/Kolkata date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: Commit and push to news repository
+        run: |
+          cd sources/news/
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "🔁 Update playlists ${{ steps.date.outputs.date }}" || echo "No changes to commit"
+          git push https://${{ secrets.PRIVATE_SOURCE_TOKEN }}@github.com/nuclearmagneton/news.git HEAD:master || echo "Nothing to push"
+          cd ../../
