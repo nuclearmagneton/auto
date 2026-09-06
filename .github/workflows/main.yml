@@ -2,13 +2,8 @@ name: autobuild
 
 on:
   schedule:
-    - cron: '0 1 * * *'    # every 1 hour
-  workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/**"
-
+    - cron: '0 1 * * *' # runs every midnight
+    
 permissions:
   contents: write
   actions: read
