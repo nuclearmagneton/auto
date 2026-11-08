@@ -3,7 +3,7 @@ name: Clean up
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:   # chạy tay
   schedule:
     - cron: "0 * * * *"
