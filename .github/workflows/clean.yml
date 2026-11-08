@@ -7,6 +7,9 @@ on:
   workflow_dispatch:   # chạy tay
   schedule:
     - cron: "0 * * * *"
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   delete-workflows:
