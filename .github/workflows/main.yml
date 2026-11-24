@@ -1,7 +1,9 @@
 name: autobuild master
 
 on:
-  workflow_dispatch:
+  schedule:
+     - cron: "10 * * * *"  
+  workflow_dispatch: # Allows manual triggering
   push:
     branches: [master]
 
