@@ -1,41 +1,30 @@
 name: autobuild master
 
 on:
-  schedule:
-    - cron: '0 */1 * * *'
   workflow_dispatch:
   push:
-    branches:
-      - master
+    branches: [master]
+
+permissions:
+  contents: write
       
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
-
-    permissions:
-      contents: write
-      actions: read
 
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
 
-      - name: Checkout private source repository
-        uses: actions/checkout@v7
-        with:
-          repository: nuclearmagneton/news
-          path: sources/news
-          token: ${{ secrets.PRIVATE_SOURCE_TOKEN }}
-          fetch-depth: 1
-          persist-credentials: false
-          ref: master
+      - name: Clone private repo
+        env:
+          GH_PAT: ${{ secrets.PRIVATE_SOURCE_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_PAT}@github.com/nuclearmagneton/news.git private-code
 
       - name: Re-generate m3u playlist
         run: |
-          cd sources/news/
+          cd private-code
           bash script.sh
           cd ../../
 
@@ -45,7 +34,7 @@ jobs:
 
       - name: Commit and push to news repository
         run: |
-          cd sources/news/
+          cd private-code
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
